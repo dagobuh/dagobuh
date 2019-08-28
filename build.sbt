@@ -35,6 +35,8 @@ ThisBuild / publishTo := {
 }
 ThisBuild / publishMavenStyle := true
 
+ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
 useGpg := true
 
 val supportedScalaVersions = Seq("2.11.12", "2.12.9")
