@@ -23,6 +23,4 @@ case class ListInputStream[A](context: List[A]) extends InputStream[List, A] {
 
 object ListInputStream {
   implicit private def list2ListInputStream[A](a: List[A]): InputStream[List, A] = ListInputStream(a)
-
-  def apply[A](context: List[A]): ListInputStream[A] = new ListInputStream(context)
 }

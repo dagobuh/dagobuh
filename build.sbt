@@ -1,7 +1,7 @@
 import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.8"
-ThisBuild / version          := "0.1.2"
+ThisBuild / version          := "0.1.3-SNAPSHOT"
 ThisBuild / organization     := "org.dagobuh"
 ThisBuild / organizationName := "Dagobuh"
 
@@ -37,6 +37,8 @@ ThisBuild / publishMavenStyle := true
 
 useGpg := true
 
+val supportedScalaVersions = Seq("2.11.12", "2.12.9")
+
 scalacOptions += "-Ypartial-unification"
 
 val common = Seq(
@@ -47,6 +49,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "dagobuh",
     skip in publish := true,
+    crossScalaVersions := Nil,
   )
   .aggregate(dagobuhApi, dagobuhFlink, dagobuhList)
 
@@ -54,6 +57,7 @@ lazy val dagobuhApi = (project in file("dagobuh-api"))
   .settings(
     name := "dagobuh-api",
     libraryDependencies ++= common,
+    crossScalaVersions := supportedScalaVersions,
   )
 
 val flinkDeps = Seq(
@@ -65,10 +69,12 @@ lazy val dagobuhFlink = (project in file("dagobuh-flink"))
   .settings(
     name := "dagobuh-flink",
     libraryDependencies ++= flinkDeps,
+    crossScalaVersions := supportedScalaVersions,
   ).dependsOn(dagobuhApi % "compile->compile")
 
 lazy val dagobuhList = (project in file("dagobuh-list"))
   .settings(
     name := "dagobuh-list",
     libraryDependencies ++= common,
+    crossScalaVersions := supportedScalaVersions,
   ).dependsOn(dagobuhApi % "compile->compile")
