@@ -49,7 +49,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "dagobuh",
     skip in publish := true,
-    crossScalaVersions := Nil,
+    crossScalaVersions := supportedScalaVersions,
   )
   .aggregate(dagobuhApi, dagobuhFlink, dagobuhList)
 
