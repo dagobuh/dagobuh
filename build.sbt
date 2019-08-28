@@ -1,7 +1,7 @@
 import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.8"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
+ThisBuild / version          := "0.1.2-SNAPSHOT"
 ThisBuild / organization     := "org.dagobuh"
 ThisBuild / organizationName := "Dagobuh"
 
@@ -42,6 +42,13 @@ scalacOptions += "-Ypartial-unification"
 val common = Seq(
   scalaTest % Test
 )
+
+lazy val root = (project in file("."))
+  .settings(
+    name := "dagobuh",
+    skip in publish := true,
+  )
+  .aggregate(dagobuhApi, dagobuhFlink, dagobuhList)
 
 lazy val dagobuhApi = (project in file("dagobuh-api"))
   .settings(
