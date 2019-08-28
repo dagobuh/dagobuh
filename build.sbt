@@ -1,7 +1,6 @@
 import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.9"
-ThisBuild / version          := "0.1.3"
 ThisBuild / organization     := "org.dagobuh"
 ThisBuild / organizationName := "Dagobuh"
 
@@ -34,10 +33,6 @@ ThisBuild / publishTo := {
   else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
 ThisBuild / publishMavenStyle := true
-
-ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
-
-useGpg := true
 
 val supportedScalaVersions = Seq("2.11.12", "2.12.9")
 
