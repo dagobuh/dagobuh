@@ -18,8 +18,9 @@ class Map[A, B: ClassTag](func: A => B) {
 
 object Map {
   def apply[A, B: ClassTag](func: A => B): Map[A, B] = new Map(func)
-  implicit def map[F[_], A, B: ClassTag]: StreamletApplier[F, Map[A, B], A, B] =
-    (in: InputStream[F, A], streamlet: Map[A, B]) => streamlet.run(in)
+  implicit def map[F[_], A, B: ClassTag]: StreamletApplier[F, Map[A, B], A, B] = new StreamletApplier[F, Map[A, B], A, B] {
+    override def run(in: InputStream[F, A], streamlet: Map[A, B]): InputStream[F, B] = streamlet.run(in)
+  }
 }
 
 

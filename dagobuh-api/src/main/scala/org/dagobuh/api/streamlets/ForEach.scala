@@ -16,7 +16,8 @@ class ForEach[A](func: A => Unit) {
 
 object ForEach {
   def apply[A](func: A => Unit): ForEach[A] = new ForEach(func)
-  implicit def forEach[F[_], A]: StreamletApplier[F, ForEach[A], A, Unit] =
-    (in: InputStream[F, A], streamlet: ForEach[A]) => streamlet.run(in)
+  implicit def forEach[F[_], A]: StreamletApplier[F, ForEach[A], A, Unit] = new StreamletApplier[F, ForEach[A], A, Unit] {
+    override def run(in: InputStream[F, A], streamlet: ForEach[A]): InputStream[F, Unit] = streamlet.run(in)
+  }
 }
 

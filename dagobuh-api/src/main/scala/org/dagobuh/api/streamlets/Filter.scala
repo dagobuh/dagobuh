@@ -16,8 +16,9 @@ class Filter[A](func: A => Boolean) {
 
 object Filter {
   def apply[A](func: A => Boolean): Filter[A] = new Filter(func)
-  implicit def filter[F[_], A]: StreamletApplier[F, Filter[A], A, A] =
-    (in: InputStream[F, A], streamlet: Filter[A]) => streamlet.run(in)
+  implicit def filter[F[_], A]: StreamletApplier[F, Filter[A], A, A] = new StreamletApplier[F, Filter[A], A, A] {
+    override def run(in: InputStream[F, A], streamlet: Filter[A]): InputStream[F, A] = streamlet.run(in)
+  }
 }
 
 

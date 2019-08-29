@@ -31,7 +31,8 @@ class DataGenerator[F[_], A: ClassTag](func: => F[A])(implicit builder: ConvertT
 
 object DataGenerator {
   def apply[F[_], A: ClassTag](func: => F[A])(implicit builder: ConvertToInputStream[F]): DataGenerator[F, A] = new DataGenerator(func)
-  implicit def dataGenerator[F[_], A]: InletApplier[F, DataGenerator[F, A], A] =
-    (streamlet: DataGenerator[F, A]) => streamlet.run()
+  implicit def dataGenerator[F[_], A]: InletApplier[F, DataGenerator[F, A], A] = new InletApplier[F, DataGenerator[F, A], A] {
+    override def run(streamlet: DataGenerator[F, A]): InputStream[F, A] = streamlet.run()
+  }
 }
 
