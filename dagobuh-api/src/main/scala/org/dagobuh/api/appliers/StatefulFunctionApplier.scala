@@ -3,9 +3,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.appliers
 
+import org.dagobuh.api.inputstream.InputStream
+
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 trait StatefulFunctionApplier[F[_], A[_, _]] {
-  def applyFunc[T, U: ClassTag](context: F[T], func: A[T, U]): F[U]
+  def apply[T, U: ClassTag](context: InputStream[F, T], func: A[T, U]): InputStream[F, U]
+}
+
+object StatefulFunctionApplier {
+  def apply[F[_], A[_, _]](implicit statefulFunctionApplier: StatefulFunctionApplier[F, A]): StatefulFunctionApplier[F, A] = statefulFunctionApplier
 }

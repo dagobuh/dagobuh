@@ -16,8 +16,8 @@ class FlinkInputStream[A: ClassTag](context: DataStream[A]) extends InputStream[
   override def map[B: ClassTag](func: A => B): InputStream[DataStream, B] = context.map(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]]))
   override def flatMap[B: ClassTag](func: A => TraversableOnce[B]): InputStream[DataStream, B] = context.flatMap(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]]))
   override def filter(func: A => Boolean): InputStream[DataStream, A] = context.filter(func)
-  override def applyStatefulFunction[G[_, _], B: ClassTag](func: G[A, B])(implicit statefulFunctionApplier: StatefulFunctionApplier[DataStream, G]): InputStream[DataStream, B] = statefulFunctionApplier.applyFunc(context, func)
   override def inner: DataStream[A] = context
+  override def mapInner[B: ClassTag](func: DataStream[A] => DataStream[B]): InputStream[DataStream, B] = func(context)
   override def union(inputStream: InputStream[DataStream, A]): InputStream[DataStream, A] = context.union(inputStream.inner)
   override def union(inputStream: TraversableOnce[A]): InputStream[DataStream, A] = union(context.executionEnvironment.fromCollection(inputStream.toIterator)(TypeInformation.of(implicitly[ClassTag[A]].runtimeClass.asInstanceOf[Class[A]])))
 }
