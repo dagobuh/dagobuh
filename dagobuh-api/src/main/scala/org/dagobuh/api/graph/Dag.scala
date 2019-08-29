@@ -68,7 +68,7 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
     * Despite what it may seem, seen is _NOT_
     * purely an optimization for already seen nodes.
     *
-    * With streaming frameworks like Llink, applying the same
+    * With streaming frameworks like Flink, applying the same
     * node multiple times would create internal Flink DAGs that duplicate work
     * and if they are stateful could potentially lose data.
     *

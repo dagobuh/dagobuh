@@ -12,5 +12,5 @@ trait InletApplier[F[_], G, I] {
 }
 
 object InletApplier {
-  def apply[F[_], G, I](implicit streamletApplier: InletApplier[F, G, I]): InletApplier[F, G, I] = implicitly
+  def apply[F[_], G, I](implicit streamletApplier: InletApplier[F, G, I]): InletApplier[F, G, I] = streamletApplier
 }

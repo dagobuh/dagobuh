@@ -8,7 +8,7 @@ import org.dagobuh.api.inputstream.InputStream
 
 import scala.language.higherKinds
 
-sealed trait Vertex[+A, B] {
+sealed trait Vertex[+A, +B] {
 }
 
 case class InletVertex[F[_], G, I](streamlet: G)(implicit applier: InletApplier[F, G, I]) extends Vertex[Nothing, I] {
