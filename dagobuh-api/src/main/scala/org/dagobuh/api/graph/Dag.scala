@@ -8,19 +8,13 @@ import org.dagobuh.api.inputstream.InputStream
 
 import scala.collection.mutable
 
-case class DagBuilder[A, B](current: Vertex[A, B],
+case class DagBuilder[A](current: Vertex[Any, A],
                             private val edges: mutable.ListBuffer[(Vertex[Any, Any], Vertex[Any, Any])] = mutable.ListBuffer.empty) {
 
-  def ~>[C](next: Vertex[B, C]): DagBuilder[B, C] = {
+  def ~>[B](next: Vertex[A, B]): DagBuilder[B] = {
     edges.append((current, next).asInstanceOf[(Vertex[Any, Any], Vertex[Any, Any])])
     DagBuilder(next, edges)
   }
-
-  def union[C, D](graph: DagBuilder[C, D]): DagBuilder[Any, Any] = {
-    DagBuilder(current.asInstanceOf[Vertex[Any, Any]], edges ++ graph.edges)
-  }
-
-  def |[C, D]: DagBuilder[C, D] => DagBuilder[Any, Any] = union
 
   def build(): List[Dag] = {
     val from = edges.map(_._1).toSet
