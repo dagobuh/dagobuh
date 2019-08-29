@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 
 class Collect[A, B: ClassTag](func: PartialFunction[A, B]) {
   def run[F[_]](in: InputStream[F, A]): InputStream[F, B] = {
-    in.filter(func.isDefinedAt).map(func.apply)
+    in.collect(func)
   }
 }
 

@@ -10,6 +10,7 @@ trait InputStream[F[_], A] {
   def map[B: ClassTag](func: A => B): InputStream[F, B]
   def flatMap[B: ClassTag](func: A => TraversableOnce[B]): InputStream[F, B]
   def filter(func: A => Boolean): InputStream[F, A]
+  def collect[B: ClassTag](func: PartialFunction[A, B]): InputStream[F, B]
   def inner: F[A]
   def mapInner[B: ClassTag](func: F[A] => F[B]): InputStream[F, B]
   def union(inputStream: InputStream[F, A]): InputStream[F, A]
