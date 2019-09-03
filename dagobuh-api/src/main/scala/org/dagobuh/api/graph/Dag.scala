@@ -4,6 +4,7 @@
 package org.dagobuh.api.graph
 
 import cats.kernel.Monoid
+import org.dagobuh.api.{DagBuilderUnionError, DagobuhError}
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
 import org.dagobuh.api.inputstream.InputStream.inputStreamMonoid
@@ -16,6 +17,14 @@ case class DagBuilder[A](current: Vertex[Any, A],
   def ~>[B](next: Vertex[A, B]): DagBuilder[B] = {
     edges.append((current, next).asInstanceOf[(Vertex[Any, Any], Vertex[Any, Any])])
     DagBuilder(next, edges)
+  }
+
+  def |(other: DagBuilder[A]): Either[DagobuhError, DagBuilder[A]] = {
+    if (current == other.current) {
+      Right(DagBuilder(current, edges ++ other.edges))
+    } else {
+      Left(DagBuilderUnionError("Cannot union DagBuilders unless the current node is the same for both"))
+    }
   }
 
   def build(): List[Dag] = {
