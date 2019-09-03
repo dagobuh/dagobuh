@@ -3,6 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.graph
 
+import cats._
+import cats.implicits._
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
 
@@ -71,13 +73,16 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
     * @param seen seen vertices
     * @return
     */
-  private def bottomUpExection(leaves: List[Vertex[Any, Any]], in: Option[InputStream[Any, Any]], seen: mutable.HashMap[Vertex[Any, Any], InputStream[Any, Any]]): List[InputStream[Any, Any]] = {
-    val runVert: (Vertex[Any, Any], Option[InputStream[Any, Any]]) => InputStream[Any, Any] = (vert, in) => {
+  private def bottomUpExection(leaves: List[Vertex[Any, Any]], in: Option[InputStream[Any, Any]], seen: mutable.HashMap[Vertex[Any, Any], Option[InputStream[Any, Any]]]): List[Option[InputStream[Any, Any]]] = {
+    val runVert: (Vertex[Any, Any], Option[InputStream[Any, Any]]) => Option[InputStream[Any, Any]] = (vert, in) => {
       val out = vert match {
+        case v@OutletVertex(_) =>
+          v.apply(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $v")))
+          None
         case v@StreamletVertex(_) =>
-          v.apply(in.getOrElse(throw new IllegalArgumentException("Invalid DAG: Inlet must be the root node")))
+          Some(v.apply(in.getOrElse(throw new IllegalArgumentException("Invalid DAG: No input for vertex $v"))))
         case v@InletVertex(_) =>
-          v.apply()
+          Some(v.apply())
       }
       seen(vert) = out
       out
@@ -89,8 +94,8 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
           reverseEdges.get(node) match {
             case Some(parents) =>
               val outs = bottomUpExection(parents, in, seen)
-              val unionedOutput = outs.reduce((x, y) => x.union(y))
-              runVert(node, Some(unionedOutput))
+              val unionedOutput = Foldable[List].fold(outs)
+              runVert(node, unionedOutput)
             case None =>
               runVert(node, in)
           }

@@ -3,7 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.graph
 
-import org.dagobuh.api.appliers.{InletApplier, StreamletApplier}
+import org.dagobuh.api.appliers.{InletApplier, OutletApplier, StreamletApplier}
 import org.dagobuh.api.inputstream.InputStream
 
 import scala.language.higherKinds
@@ -13,6 +13,10 @@ sealed trait Vertex[+A, +B] {
 
 case class InletVertex[F[_], G, I](streamlet: G)(implicit applier: InletApplier[F, G, I]) extends Vertex[Nothing, I] {
   def apply(): InputStream[F, I] = applier.run(streamlet)
+}
+
+case class OutletVertex[F[_], G, H](streamlet: G)(implicit applier: OutletApplier[F, G, H]) extends Vertex[H, Nothing] {
+  def apply(inputStream: InputStream[F, H]): Unit = applier.run(inputStream, streamlet)
 }
 
 case class StreamletVertex[F[_], G, H, I](streamlet: G)(implicit applier: StreamletApplier[F, G, H, I]) extends Vertex[H, I] {

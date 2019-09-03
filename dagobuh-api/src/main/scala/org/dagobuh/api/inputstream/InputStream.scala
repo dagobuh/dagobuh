@@ -3,6 +3,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.inputstream
 
+import cats.kernel.Semigroup
+
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
@@ -18,4 +20,7 @@ trait InputStream[F[_], A] {
 }
 
 object InputStream {
+  implicit def inputStreamSemigroup[F[_], T]: Semigroup[InputStream[F, T]] = new Semigroup[InputStream[F, T]] {
+    override def combine(x: InputStream[F, T], y: InputStream[F, T]): InputStream[F, T] = x.union(y)
+  }
 }
