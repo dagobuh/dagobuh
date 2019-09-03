@@ -3,10 +3,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.graph
 
-import cats._
-import cats.implicits._
+import cats.kernel.Monoid
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
+import org.dagobuh.api.inputstream.InputStream.inputStreamMonoid
 
 import scala.collection.mutable
 
@@ -94,7 +94,7 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
           reverseEdges.get(node) match {
             case Some(parents) =>
               val outs = bottomUpExection(parents, in, seen)
-              val unionedOutput = Foldable[List].fold(outs)
+              val unionedOutput = Monoid.combineAll(outs)(inputStreamMonoid[Any, Any])
               runVert(node, unionedOutput)
             case None =>
               runVert(node, in)
