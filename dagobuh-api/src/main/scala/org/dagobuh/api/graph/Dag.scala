@@ -80,9 +80,11 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
           v.apply(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $v")))
           None
         case v@StreamletVertex(_) =>
-          Some(v.apply(in.getOrElse(throw new IllegalArgumentException("Invalid DAG: No input for vertex $v"))))
+          Some(v.apply(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $v"))))
         case v@InletVertex(_) =>
           Some(v.apply())
+        case _: IdentityVertex[_] =>
+          in
       }
       seen(vert) = out
       out

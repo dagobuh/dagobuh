@@ -22,6 +22,13 @@ case class OutletVertex[F[_], G, H](streamlet: G)(implicit applier: OutletApplie
 case class StreamletVertex[F[_], G, H, I](streamlet: G)(implicit applier: StreamletApplier[F, G, H, I]) extends Vertex[H, I] {
   def apply(inputStream: InputStream[F, H]): InputStream[F, I] = applier.run(inputStream, streamlet)
 }
+
+class IdentityVertex[H] extends Vertex[H, H]
+
+object IdentityVertex {
+  def apply[H](): IdentityVertex[H] = new IdentityVertex()
+}
+
 //
 //case class StreamletSplitter[F[_], G1, G2, H1, H2, I1, I2](streamlets: (G1, G2))(implicit firstApplier: StreamletApplier[F, G1, H1, I1], secondApplier: StreamletApplier[F, G2, H2, I2]) extends Vertex {
 //  def apply(inputStream: InputStream[F, (H1, H2)]): (InputStream[F, I1], InputStream[F, I2]) = {
