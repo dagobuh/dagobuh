@@ -30,8 +30,12 @@ object InputStream {
     override def empty: Option[InputStream[F, T]] = None
 
     override def combine(x: Option[InputStream[F, T]], y: Option[InputStream[F, T]]): Option[InputStream[F, T]] = {
-      Applicative[Option].product(x, y)
-        .map((Semigroup[InputStream[F, T]].combine _).tupled)
+      (x, y) match {
+        case (Some(x), Some(y)) => Some(x.union(y))
+        case (Some(x), None) => Some(x)
+        case (None, Some(y)) => Some(y)
+        case (None, None) => None
+      }
     }
   }
 }
