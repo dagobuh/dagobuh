@@ -40,16 +40,14 @@ scalacOptions += "-Ypartial-unification"
 
 val common = Seq(
   scalaTest % Test,
-)
-val apiDeps = Seq(
   "org.typelevel" %% "cats-core" % "2.0.0-RC1"
-) ++ common
+)
 
 lazy val root = (project in file("."))
   .settings(
     name := "dagobuh",
     skip in publish := true,
-    crossScalaVersions := apiDeps,
+    crossScalaVersions := supportedScalaVersions,
   )
   .aggregate(dagobuhApi, dagobuhFlink, dagobuhList)
 
