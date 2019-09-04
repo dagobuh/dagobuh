@@ -3,21 +3,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.streamlets
 
-import org.dagobuh.api.appliers.StreamletApplier
 import org.dagobuh.api.inputstream.InputStream
 
 import scala.language.higherKinds
 
-class ForEach[A](func: A => Unit) {
-  def run[F[_]](in: InputStream[F, A]): InputStream[F, Unit] = {
+class ForEach[F[_], A](func: A => Unit) extends Sink[F, A] {
+  def run(in: InputStream[F, A]): Unit = {
     in.map(func)
   }
 }
 
 object ForEach {
-  def apply[A](func: A => Unit): ForEach[A] = new ForEach(func)
-  implicit def forEach[F[_], A]: StreamletApplier[F, ForEach[A], A, Unit] = new StreamletApplier[F, ForEach[A], A, Unit] {
-    override def run(in: InputStream[F, A], streamlet: ForEach[A]): InputStream[F, Unit] = streamlet.run(in)
-  }
+  def apply[F[_], A](func: A => Unit): ForEach[F, A] = new ForEach(func)
 }
-

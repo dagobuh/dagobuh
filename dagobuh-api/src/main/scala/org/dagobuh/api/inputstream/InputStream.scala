@@ -22,6 +22,7 @@ trait InputStream[F[_], A] {
 }
 
 object InputStream {
+  Either.catchNonFatal()
   implicit def inputStreamSemigroup[F[_], T]: Semigroup[InputStream[F, T]] = new Semigroup[InputStream[F, T]] {
     override def combine(x: InputStream[F, T], y: InputStream[F, T]): InputStream[F, T] = x.union(y)
   }

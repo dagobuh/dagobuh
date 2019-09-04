@@ -3,24 +3,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.streamlets
 
-import org.dagobuh.api.appliers.StreamletApplier
 import org.dagobuh.api.inputstream.InputStream
 
 import scala.language.higherKinds
 import scala.reflect.ClassTag
 
-class Map[A, B: ClassTag](func: A => B) {
-  def run[F[_]](in: InputStream[F, A]): InputStream[F, B] = {
+class Map[F[_], A, B: ClassTag](func: A => B) extends Transformer[F, A, B] {
+  def run(in: InputStream[F, A]): InputStream[F, B] = {
     in.map(func)
   }
 }
 
-
 object Map {
-  def apply[A, B: ClassTag](func: A => B): Map[A, B] = new Map(func)
-  implicit def map[F[_], A, B: ClassTag]: StreamletApplier[F, Map[A, B], A, B] = new StreamletApplier[F, Map[A, B], A, B] {
-    override def run(in: InputStream[F, A], streamlet: Map[A, B]): InputStream[F, B] = streamlet.run(in)
-  }
+  def apply[F[_], A, B: ClassTag](func: A => B): Map[F, A, B] = new Map(func)
 }
-
-

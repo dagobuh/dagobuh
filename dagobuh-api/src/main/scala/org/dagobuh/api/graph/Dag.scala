@@ -8,18 +8,19 @@ import org.dagobuh.api.{DagBuilderUnionError, DagobuhError}
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
 import org.dagobuh.api.inputstream.InputStream.inputStreamMonoid
+import org.dagobuh.api.streamlets.{Sink, Source, Streamlet, Transformer}
 
 import scala.collection.mutable
 
-case class DagBuilder[A](current: Vertex[Any, A],
-                            private val edges: mutable.ListBuffer[(Vertex[Any, Any], Vertex[Any, Any])] = mutable.ListBuffer.empty) {
+case class DagBuilder[+A](current: Streamlet[Any, A],
+                            private val edges: mutable.ListBuffer[(Streamlet[Any, Any], Streamlet[Any, Any])] = mutable.ListBuffer.empty) {
 
-  def ~>[B](next: Vertex[A, B]): DagBuilder[B] = {
-    edges.append((current, next).asInstanceOf[(Vertex[Any, Any], Vertex[Any, Any])])
-    DagBuilder(next, edges)
+  def ~>[U >: A, B](next: Streamlet[U, B]): DagBuilder[B] = {
+    edges.append((current, next).asInstanceOf[(Streamlet[Any, Any], Streamlet[Any, Any])])
+    DagBuilder(next.asInstanceOf[Streamlet[Any, B]], edges)
   }
 
-  def |(other: DagBuilder[A]): Either[DagobuhError, DagBuilder[A]] = {
+  def |[U >: A](other: DagBuilder[U]): Either[DagobuhError, DagBuilder[U]] = {
     if (current == other.current) {
       Right(DagBuilder(current, edges ++ other.edges))
     } else {
@@ -37,7 +38,7 @@ case class DagBuilder[A](current: Vertex[Any, A],
     roots.map(Dag(_, edgeMap, reverseEdgeMap)).toList
   }
 
-  private def validateDag(edges: List[(Vertex[Any, Any], Vertex[Any, Any])]): Unit = {
+  private def validateDag(edges: List[(Streamlet[_, _], Streamlet[_, _])]): Unit = {
     //TODO: Use result types and make build() fallible
     val from = edges.map(_._1).toSet
     val to = edges.map(_._2).toSet
@@ -46,18 +47,18 @@ case class DagBuilder[A](current: Vertex[Any, A],
     if (selfRefs.nonEmpty) {
       throw new IllegalArgumentException(s"Invalid DAG: Self references are not allowed\nSelf Refs: $selfRefs")
     }
-    if (roots.exists(!_.isInstanceOf[InletVertex[Any, Any, Any]])) {
-      throw new IllegalArgumentException(s"Invalid DAG: All roots must be instances of InletVertex\nRoots: $roots")
+    if (roots.exists(!_.isInstanceOf[Source[Any, Any]])) {
+      throw new IllegalArgumentException(s"Invalid DAG: All roots must be instances of InletStreamlet\nRoots: $roots")
     }
   }
 }
 
-case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, private val reverseEdges: EdgeMap) {
+case class Dag(private val root: Streamlet[Any, Any], private val edges: EdgeMap, private val reverseEdges: EdgeMap) {
   def run(): Unit = {
     bottomUpExection(leaves(root), None, mutable.HashMap.empty)
   }
-  private def leaves(root: Vertex[Any, Any]): List[Vertex[Any, Any]] = {
-    val out = mutable.ListBuffer.empty[Vertex[Any, Any]]
+  private def leaves(root: Streamlet[Any, Any]): List[Streamlet[Any, Any]] = {
+    val out = mutable.ListBuffer.empty[Streamlet[Any, Any]]
     val verts = mutable.Queue(root)
     while (verts.nonEmpty) {
       val node = verts.dequeue()
@@ -82,18 +83,16 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
     * @param seen seen vertices
     * @return
     */
-  private def bottomUpExection(leaves: List[Vertex[Any, Any]], in: Option[InputStream[Any, Any]], seen: mutable.HashMap[Vertex[Any, Any], Option[InputStream[Any, Any]]]): List[Option[InputStream[Any, Any]]] = {
-    val runVert: (Vertex[Any, Any], Option[InputStream[Any, Any]]) => Option[InputStream[Any, Any]] = (vert, in) => {
-      val out = vert match {
-        case v@OutletVertex(_) =>
-          v.apply(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $v")))
+  private def bottomUpExection(leaves: List[Streamlet[Any, Any]], in: Option[InputStream[Any, Any]], seen: mutable.HashMap[Streamlet[Any, Any], Option[InputStream[Any, Any]]]): List[Option[InputStream[Any, Any]]] = {
+    val runVert: (Streamlet[Any, Any], Option[InputStream[Any, Any]]) => Option[InputStream[Any, Any]] = (vert, in) => {
+      val out = (vert: Streamlet[_, _]) match {
+        case value: Source[_, _] =>
+          Some(value.asInstanceOf[Source[Any, Any]].run())
+        case value: Transformer[_, _, _] =>
+          Some(value.asInstanceOf[Transformer[Any, Any, Any]].run(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $value"))))
+        case value: Sink[_, _] =>
+          value.asInstanceOf[Sink[Any, Any]].run(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $value")))
           None
-        case v@StreamletVertex(_) =>
-          Some(v.apply(in.getOrElse(throw new IllegalArgumentException(s"Invalid DAG: No input for vertex $v"))))
-        case v@InletVertex(_) =>
-          Some(v.apply())
-        case _: IdentityVertex[_] =>
-          in
       }
       seen(vert) = out
       out
@@ -116,5 +115,5 @@ case class Dag(private val root: Vertex[Any, Any], private val edges: EdgeMap, p
 }
 
 object Dag {
-  private type EdgeMap = Map[Vertex[Any, Any], List[Vertex[Any, Any]]]
+  private type EdgeMap = Map[Streamlet[Any, Any], List[Streamlet[Any, Any]]]
 }
