@@ -47,7 +47,7 @@ case class DagBuilder[+A](current: Streamlet[Any, A],
     if (selfRefs.nonEmpty) {
       throw new IllegalArgumentException(s"Invalid DAG: Self references are not allowed\nSelf Refs: $selfRefs")
     }
-    if (roots.exists(!_.isInstanceOf[Source[Any, Any]])) {
+    if (roots.exists(root => !root.isInstanceOf[Source[_, _]])) {
       throw new IllegalArgumentException(s"Invalid DAG: All roots must be instances of InletStreamlet\nRoots: $roots")
     }
   }
