@@ -1,7 +1,7 @@
 package org.dagobuh.api
 
 import org.dagobuh.api.inputstream.InputStream
-import org.dagobuh.api.streamlets.{CompositeTransformer, Source, Transformer}
+import org.dagobuh.api.streamlets._
 
 import scala.language.{higherKinds, implicitConversions}
 

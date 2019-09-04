@@ -11,6 +11,8 @@ class Filter[F[_], A](func: A => Boolean) extends Transformer[F, A, A] {
   def run(in: InputStream[F, A]): InputStream[F, A] = {
     in.filter(func)
   }
+
+  def negate: Filter[F, A] = Filter(x => !func(x))
 }
 
 object Filter {

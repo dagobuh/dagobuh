@@ -8,9 +8,10 @@ import org.dagobuh.api.{DagBuilderUnionError, DagobuhError}
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
 import org.dagobuh.api.inputstream.InputStream.inputStreamMonoid
-import org.dagobuh.api.streamlets.{Sink, Source, Streamlet, Transformer}
+import org.dagobuh.api.streamlets.{Filter, Sink, Source, Streamlet, Transformer}
 
 import scala.collection.mutable
+import scala.language.higherKinds
 
 case class DagBuilder[+A](current: Streamlet[Any, A],
                             private val edges: mutable.ListBuffer[(Streamlet[Any, Any], Streamlet[Any, Any])] = mutable.ListBuffer.empty) {
@@ -27,6 +28,8 @@ case class DagBuilder[+A](current: Streamlet[Any, A],
       Left(DagBuilderUnionError("Cannot union DagBuilders unless the current node is the same for both"))
     }
   }
+
+  def partition[F[_], U >: A](filter: Filter[F, U]): (DagBuilder[U], DagBuilder[U]) = (this ~> filter, this ~> filter.negate)
 
   def build(): List[Dag] = {
     val from = edges.map(_._1).toSet
@@ -47,7 +50,7 @@ case class DagBuilder[+A](current: Streamlet[Any, A],
     if (selfRefs.nonEmpty) {
       throw new IllegalArgumentException(s"Invalid DAG: Self references are not allowed\nSelf Refs: $selfRefs")
     }
-    if (roots.exists(root => !root.isInstanceOf[Source[_, _]])) {
+    if (roots.exists(root => !root.isInstanceOf[Source[Any, _]])) {
       throw new IllegalArgumentException(s"Invalid DAG: All roots must be instances of InletStreamlet\nRoots: $roots")
     }
   }
