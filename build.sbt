@@ -59,8 +59,8 @@ lazy val dagobuhApi = (project in file("dagobuh-api"))
   )
 
 val flinkDeps = Seq(
-  "org.apache.flink" %% "flink-scala" % "1.8+",
-  "org.apache.flink" %% "flink-streaming-scala" % "1.8+"
+  "org.apache.flink" %% "flink-scala" % "1.8.1+",
+  "org.apache.flink" %% "flink-streaming-scala" % "1.8.1+"
 ) ++ common
 
 lazy val dagobuhFlink = (project in file("dagobuh-flink"))
