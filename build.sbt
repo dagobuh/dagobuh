@@ -1,4 +1,6 @@
 import Dependencies._
+enablePlugins(GhpagesPlugin)
+enablePlugins(SiteScaladocPlugin)
 
 ThisBuild / scalaVersion     := "2.12.9"
 ThisBuild / organization     := "org.dagobuh"
@@ -33,6 +35,9 @@ ThisBuild / publishTo := {
   else Some("releases" at nexus + "service/local/staging/deploy/maven2")
 }
 ThisBuild / publishMavenStyle := true
+
+git.remoteRepo := "git@github.com:dagobuh/dagobuh.git"
+paradoxTheme := Some(builtinParadoxTheme("generic"))
 
 val supportedScalaVersions = Seq("2.11.12", "2.12.9")
 

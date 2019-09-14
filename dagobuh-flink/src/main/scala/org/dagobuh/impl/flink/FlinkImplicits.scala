@@ -13,17 +13,17 @@ import scala.language.{higherKinds, implicitConversions}
 import scala.reflect.ClassTag
 
 object FlinkImplicits {
-  type StatefulFlatmapFunctionApplier[F[_]] = StatefulFunctionApplier[F, FlatMapFunction]
+  type StatefulFlatMapFunctionApplier[F[_]] = StatefulFunctionApplier[F, FlatMapFunction]
   type StatefulMapFunctionApplier[F[_]] = StatefulFunctionApplier[F, MapFunction]
 
-  implicit val statefulFlinkFlatmapFunction: StatefulFlatmapFunctionApplier[DataStream] =
+  implicit val statefulFlinkFlatmapFunction: StatefulFlatMapFunctionApplier[DataStream] =
     new StatefulFunctionApplier[DataStream, FlatMapFunction] {
-      override def apply[A, B: ClassTag](inputStream: InputStream[DataStream, A], func: FlatMapFunction[A, B]): InputStream[DataStream, B] = inputStream.mapInner(_.flatMap(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]])))
+      override def apply[A, B: ClassTag](func: FlatMapFunction[A, B])(inputStream: InputStream[DataStream, A]): InputStream[DataStream, B] = inputStream.mapInner(_.flatMap(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]])))
     }
 
   implicit val statefulFlinkMapFunction: StatefulMapFunctionApplier[DataStream] =
     new StatefulFunctionApplier[DataStream, MapFunction] {
-      override def apply[A, B: ClassTag](inputStream: InputStream[DataStream, A], func: MapFunction[A, B]): InputStream[DataStream, B] = inputStream.mapInner(_.map(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]])))
+      override def apply[A, B: ClassTag](func: MapFunction[A, B])(inputStream: InputStream[DataStream, A]): InputStream[DataStream, B] = inputStream.mapInner(_.map(func)(TypeInformation.of(implicitly[ClassTag[B]].runtimeClass.asInstanceOf[Class[B]])))
     }
 
   implicit def convertToInputStream: ConvertToInputStream[DataStream] = new ConvertToInputStream[DataStream] {
