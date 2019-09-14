@@ -3,7 +3,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 package org.dagobuh.api.inputstream
 
-import cats.Applicative
 import cats.implicits._
 import cats.kernel.{Monoid, Semigroup}
 

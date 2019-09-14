@@ -4,11 +4,11 @@
 package org.dagobuh.api.graph
 
 import cats.kernel.Monoid
-import org.dagobuh.api.{DagBuilderUnionError, DagobuhError}
 import org.dagobuh.api.graph.Dag.EdgeMap
 import org.dagobuh.api.inputstream.InputStream
 import org.dagobuh.api.inputstream.InputStream.inputStreamMonoid
-import org.dagobuh.api.streamlets.{Filter, Sink, Source, Streamlet, Transformer}
+import org.dagobuh.api.streamlets.{Sink, Source, Streamlet, Transformer}
+import org.dagobuh.api.{DagBuilderUnionError, DagobuhError}
 
 import scala.collection.mutable
 import scala.language.higherKinds
